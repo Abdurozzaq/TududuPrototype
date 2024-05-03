@@ -5,6 +5,15 @@ This is todo list app prototype made by next.js. no database.
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+
+
+
+![image](https://github.com/Abdurozzaq/TududuPrototype/assets/20965106/e9d3e2a7-309a-4d3f-bfa3-2d7ed77b8c3b)
+![image](https://github.com/Abdurozzaq/TududuPrototype/assets/20965106/0e8c5318-dc19-42e9-9ac9-24e41e7658d0)
+
+
+
+
 ## Getting Started
 
 First, run the development server:
