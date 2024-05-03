@@ -1,113 +1,357 @@
-import Image from "next/image";
+"use client";
+
+import * as React from 'react';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Checkbox from '@mui/material/Checkbox';
+import IconButton from '@mui/material/IconButton';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import Paper from '@mui/material/Paper';
+import InputBase from '@mui/material/InputBase';
+import Divider from '@mui/material/Divider';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Modal from '@mui/material/Modal';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+
+    interface tasks {
+        code: string,
+        message: string,
+        checked: boolean
+    }
+
+    // Menu Right Click
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    // Modal Edit
+    const [openEditModal, setOpenEditModal] = React.useState(false);
+    const handleOpenEditModal = () => setOpenEditModal(true);
+    const handleCloseEditModal = () => setOpenEditModal(false);
+
+    const [editDataCode, setEditDataCode] = React.useState<string>('important');
+    const [editDataType, setEditDataType] = React.useState<string>('important');
+    const [editData, setEditData] = React.useState<string>("");
+    const [newData, setNewData] = React.useState<string>("");
+
+    const [importants, setImportants] = React.useState<tasks[]>([
+        {
+            code: "ABC4",
+            message: "Write Your Essay!",
+            checked: false
+        },
+        {
+            code: "ABC5",
+            message: "Feed your cat!",
+            checked: false
+        },
+        {
+            code: "ABC6",
+            message: "Buy milk and cereals!",
+            checked: true
+        }
+    ]);
+
+    const [tasks , setTasks] = React.useState<tasks[]>([
+        {
+            code: "ABC1",
+            message: "Do Laundry!",
+            checked: false
+        },
+        {
+            code: "ABC2",
+            message: "Read Newspaper!",
+            checked: false
+        },
+        {
+            code: "ABC3",
+            message: "Gym Excercise Day #20!",
+            checked: true
+        }
+    ]);
+
+    React.useEffect(() => {
+        sortImportants();
+        sortTasks();
+    }, []);
+
+    React.useEffect(() => {
+        sortImportants();
+    }, [importants]);
+
+    React.useEffect(() => {
+        sortTasks();
+    }, [tasks]);
+
+    const sortTasks = () => {
+        // @ts-ignore
+        const sortedTasks = [...tasks].sort((a, b) => b.checked - a.checked);
+        setTasks(sortedTasks);
+    }
+
+    const sortImportants = () => {
+        // @ts-ignore
+        const sortedImportants = [...importants].sort((a, b) => b.checked - a.checked);
+        setImportants(sortedImportants);
+    }
+
+    const toggleTask = (code: string, value: any) => {
+        setTasks(tasks.map(item => (item.code === code ? { ...item, checked: !value } : item)));
+    };
+
+    const toggleImportant = (code: string, value: any) => {
+        setImportants(importants.map(item => (item.code === code ? { ...item, checked: !value } : item)));
+    };
+
+    const addToImportant = (data: tasks) => {
+        setImportants(importants => [...importants, data]);
+
+        const removedTasks = tasks.filter(obj => obj.code !== data.code);
+        setTasks(removedTasks);
+    };
+
+    const removeFromImportant = (data: tasks) => {
+        setTasks(tasks => [...tasks, data]);
+
+        const removedImportants = importants.filter(obj => obj.code !== data.code);
+        setImportants(removedImportants);
+    };
+
+    const addNewTask = () => {
+        setTasks(tasks => [...tasks, {
+            code: Math.random().toString(36).substring(2, 10),
+            message: newData,
+            checked: false
+        }]);
+        setNewData("");
+    };
+
+    const editMessage = () => {
+        if (editDataType === "important") {
+            // @ts-ignore
+            setImportants(importants.map(item => (item.code === editDataCode ? { ...item, message: editData } : item)));
+        } else {
+            // @ts-ignore
+            setTasks(tasks.map(item => (item.code === editDataCode ? { ...item, message: editData } : item)));
+        }
+    }
+
+    const deleteMessage = () => {
+        if (editDataType === "important") {
+            // @ts-ignore
+            const removedImportants = importants.filter(obj => obj.code !== editDataCode);
+            setImportants(removedImportants);
+        } else {
+            // @ts-ignore
+            const removedTasks = tasks.filter(obj => obj.code !== editDataCode);
+            setTasks(removedTasks);
+        }
+    }
+
+    const style = {
+        position: 'absolute' as 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: 'background.paper',
+        border: '2px solid #000',
+        boxShadow: 24,
+        p: 4,
+    };
+
+    return (
+        <div className={'w-screen h-screen'}>
+            <h3 className={'drop-shadow-sm text-slate-900 opacity-70 text-center text-4xl font-sans font-bold pb-2 pt-8'} style={{paddingLeft: '15px', paddingRight: '15px'}}>Tududu
+                App</h3>
+            <h6 className={'drop-shadow-sm text-slate-900 opacity-70 text-center text-2xl font-sans font-medium'} style={{paddingLeft: '15px', paddingRight: '15px'}}>Write What You
+                Gonna Do Here! </h6>
+
+            <div className="container sm:w-full md:w-2/5 mx-auto text-center mt-20 " style={{paddingLeft: '15px', paddingRight: '15px'}}>
+                <div className="grid grid-cols-1 gap-4 mb-3">
+                    <div>
+                        <h4 className={'drop-shadow-sm text-slate-900 opacity-70 text-left text-2xl font-sans font-medium'}>Important</h4>
+                    </div>
+                </div>
+
+                {
+                    importants.map((important, index) => {
+                        return (
+                            <List key={index} className={'rounded-lg mx-auto w-full py-0 opacity-70 drop-shadow-sm mb-3'}
+                                  sx={{textAlign: 'center', bgcolor: 'white'}}>
+                                <ListItem
+                                    className={'h-md'}
+                                    secondaryAction={
+                                        <>
+                                            <IconButton
+                                                edge="end"
+                                                aria-label="options"
+                                                onClick={() => removeFromImportant(important)}
+                                            >
+                                                <StarIcon/>
+                                            </IconButton>
+                                            <IconButton
+                                                edge="end"
+                                                aria-label="options"
+                                                onClick={(event) => {handleClick(event); setEditDataCode(important.code); setEditDataType('important'); setEditData(important.message);}}
+                                            >
+                                                <MoreVertIcon/>
+                                            </IconButton>
+                                        </>
+                                    }
+                                    disablePadding
+                                >
+                                    <ListItemButton dense>
+                                        <ListItemIcon>
+                                            <Checkbox
+                                                edge="start"
+                                                checked={important.checked}
+                                                onChange={() => toggleImportant(important.code, important.checked)}
+                                            />
+                                        </ListItemIcon>
+                                        <ListItemText className={'font-semibold'} primary={important.message}/>
+                                    </ListItemButton>
+                                </ListItem>
+                            </List>
+                        );
+                    })
+                }
+            </div>
+
+            <div className="container sm:w-full md:w-2/5 mx-auto text-center mt-20 " style={{paddingLeft: '15px', paddingRight: '15px'}}>
+                <div className="grid grid-cols-1 gap-4 mb-3">
+                    <div>
+                        <h4 className={'drop-shadow-sm text-slate-900 opacity-70 text-left text-2xl font-sans font-medium'}>Tasks</h4>
+                    </div>
+                </div>
+
+                {
+                    tasks.map((task, index) => {
+                        // @ts-ignore
+                        return (
+                            <List key={index} className={'rounded-lg mx-auto w-full py-0 opacity-70 drop-shadow-sm mb-3'}
+                                  sx={{textAlign: 'center', bgcolor: 'white'}}>
+                                <ListItem
+                                    className={'h-md'}
+                                    secondaryAction={
+                                        <>
+                                            <IconButton
+                                                edge="end"
+                                                aria-label="options"
+                                                onClick={() => addToImportant(task)}
+                                            >
+                                                <StarBorderIcon/>
+                                            </IconButton>
+                                            <IconButton
+                                                edge="end"
+                                                aria-label="options"
+                                                onClick={(event) => {handleClick(event); setEditDataCode(task.code); setEditDataType('task'); setEditData(task.message);}}
+                                            >
+                                                <MoreVertIcon/>
+                                            </IconButton>
+                                        </>
+                                    }
+                                    disablePadding
+                                >
+                                    <ListItemButton dense>
+                                        <ListItemIcon>
+                                            <Checkbox
+                                                edge="start"
+                                                checked={task.checked}
+                                                onChange={() => toggleTask(task.code, task.checked)}
+                                            />
+                                        </ListItemIcon>
+                                        <ListItemText className={'font-semibold'} primary={task.message}/>
+                                    </ListItemButton>
+                                </ListItem>
+                            </List>
+                        );
+                    })
+                }
+            </div>
+
+
+
+            <div className="container sm:w-full md:w-2/5 mx-auto text-center mt-20" style={{paddingLeft: '15px', paddingRight: '15px'}}>
+                <Divider className={'bg-white opacity-70 mb-3'} sx={{ height: 2, m: 0.5 }} orientation="horizontal" />
+
+                <Paper
+                    elevation={0}
+                    className={'rounded-lg mx-auto w-full opacity-70 drop-shadow-sm bg-white'}
+                    component="form"
+                    sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}
+                >
+                    <InputBase
+                        defaultValue={newData}
+                        onBlur={e => setNewData(e.target.value)}
+                        sx={{ ml: 1, flex: 1 }}
+                        placeholder="What do you need todo?"
+                        inputProps={{ 'aria-label': 'add new todo' }}
+                    />
+
+                    <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+                    <IconButton onClick={() => addNewTask()} disabled={newData.length <= 0} sx={{ p: '10px' }} aria-label="directions">
+                        <AddCircleIcon />
+                    </IconButton>
+                </Paper>
+                <br/>
+                <br/>
+            </div>
+
+            <Menu
+                id="basic-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                MenuListProps={{
+                    'aria-labelledby': 'basic-button',
+                }}
+            >
+                <MenuItem onClick={() => { handleClose(); handleOpenEditModal(); }}>Edit</MenuItem>
+                <MenuItem onClick={() => { handleClose(); deleteMessage(); }}>Delete</MenuItem>
+            </Menu>
+
+            <Modal
+                open={openEditModal}
+                onClose={handleCloseEditModal}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={style}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                        Edit Message
+                    </Typography>
+                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                        <TextField
+                            className={'w-full'}
+                            id="edit-message"
+                            label="Edit Message"
+                            variant="outlined"
+                            defaultValue={editData}
+                            onBlur={e => setEditData(e.target.value)}
+                        />
+                        <Button onClick={() => { handleCloseEditModal(); editMessage(); }} disabled={editData.length <= 0} className={'w-full mt-3'} variant="contained">SUBMIT</Button>
+                    </Typography>
+                </Box>
+            </Modal>
         </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+    );
 }
+
